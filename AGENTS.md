@@ -28,3 +28,10 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- Recipe screens read data only through `recipeService` in `src/lib/recipe/service.ts` (currently the mock in `mock-service.ts`); swap the implementation there to connect a real extraction API so UI code stays unchanged.
+- Every extracted detail carries a `certainty` (explicit / observed / estimated / unspecified); UI must show non-explicit tags and never display an invented amount for unspecified values, because the product promise is honesty about what the video actually said.
+- Cook Mode shows a countdown only when `hasEvidencedTimer` passes (duration stated or observed); estimated durations are shown as text only.
+- Per-tab cooking progress (ready ingredients, completed steps) lives in sessionStorage via `useRecipeProgress`; there are no accounts or saved recipes by design.
