@@ -9,7 +9,6 @@ export const MOCK_RECIPE: Recipe = {
   source: {
     platform: "instagram",
     url: "https://www.instagram.com/reel/C8xNoodles10/",
-    author: "@thekitchenhour",
     thumbnailUrl: thumbnail.url,
   },
   servings: { value: 2, certainty: "explicit" },

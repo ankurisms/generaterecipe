@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Check, ChefHat, Timer, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChefHat, Timer, X } from "lucide-react";
 import { useCallback, useEffect, useRef, type ReactNode, type TouchEvent } from "react";
 
 import { CertaintyTag } from "@/components/recipe/CertaintyTag";
@@ -182,11 +182,7 @@ function CookMode() {
 
           {/* Bottom controls, in thumb reach */}
           <footer className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur">
-            <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:px-6">
-              <CompleteToggle
-                done={progress.completedSteps.includes(step.id)}
-                onToggle={() => setStepComplete(step.id)}
-              />
+            <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:px-6">
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
@@ -198,7 +194,14 @@ function CookMode() {
                 >
                   <ArrowLeft aria-hidden />
                 </Button>
-                <Button size="xl" className="flex-1" onClick={() => goTo(stepNumber + 1)}>
+                <Button
+                  size="xl"
+                  className="flex-1"
+                  onClick={() => {
+                    setStepComplete(step.id, true);
+                    goTo(stepNumber + 1);
+                  }}
+                >
                   {stepNumber === total ? "Finish" : "Next step"}
                   <ArrowRight aria-hidden />
                 </Button>
@@ -273,31 +276,6 @@ function StepContent({
         </p>
       )}
     </div>
-  );
-}
-
-function CompleteToggle({ done, onToggle }: { done: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={done}
-      className={cn(
-        "flex h-12 w-full items-center justify-center gap-2 rounded-full border text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        done ? "border-primary bg-primary/10 text-primary" : "border-input text-foreground hover:bg-accent",
-      )}
-    >
-      <span
-        className={cn(
-          "grid size-5 place-items-center rounded-full border-2",
-          done ? "border-primary bg-primary text-primary-foreground" : "border-input",
-        )}
-        aria-hidden
-      >
-        {done && <Check className="size-3" strokeWidth={3} />}
-      </span>
-      {done ? "Step complete" : "Mark step complete"}
-    </button>
   );
 }
 

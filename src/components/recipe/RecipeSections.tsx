@@ -1,4 +1,4 @@
-import { ExternalLink, Instagram, Youtube } from "lucide-react";
+import { Instagram, Youtube } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { CertaintyTag } from "./CertaintyTag";
@@ -30,21 +30,11 @@ export function SourceThumbnail({ recipe }: { recipe: Recipe }) {
       ) : (
         <div className="aspect-[16/11] w-full" />
       )}
-      <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-2">
+      <div className="absolute bottom-3 left-3">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur">
           <PlatformIcon className="size-3.5" aria-hidden />
           {platformLabel}
-          {source.author && <span className="text-muted-foreground">· {source.author}</span>}
         </span>
-        <a
-          href={source.url}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1 rounded-full bg-background/90 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur hover:bg-background"
-        >
-          Original <ExternalLink className="size-3" aria-hidden />
-          <span className="sr-only">(opens in a new tab)</span>
-        </a>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowRight, ClipboardPaste, Link2 } from "lucide-react";
+import { ArrowRight, Link2 } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -26,18 +26,6 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
     void navigate({ to: "/processing", search: { url: result.url } });
   }
 
-  async function pasteFromClipboard() {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        setValue(text.trim());
-        setError(null);
-      }
-    } catch {
-      setError("Couldn't read your clipboard. Long-press the field to paste instead.");
-    }
-  }
-
   return (
     <form onSubmit={submit} noValidate className="w-full">
       <label htmlFor={inputId} className="sr-only">
@@ -45,7 +33,7 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
       </label>
       <div
         className={cn(
-          "flex items-center gap-2 rounded-full border bg-card pl-4 pr-1.5 transition-colors focus-within:border-primary",
+          "flex items-center gap-2 rounded-full border bg-card px-4 transition-colors focus-within:border-primary",
           error ? "border-destructive" : "border-input",
         )}
       >
@@ -68,18 +56,6 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
           aria-describedby={error ? errorId : undefined}
           className="h-14 min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
-        {!value && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={pasteFromClipboard}
-            className="h-10 rounded-full px-3 text-sm text-muted-foreground"
-          >
-            <ClipboardPaste aria-hidden />
-            Paste
-          </Button>
-        )}
       </div>
       <p
         id={errorId}
