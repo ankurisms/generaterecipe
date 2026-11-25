@@ -35,7 +35,8 @@ export function getPendingTranscript(url: string): string | null {
   if (!raw) return null;
   try {
     const p = JSON.parse(raw) as { url?: string; text?: string };
-    return p.url === url && p.text ? p.text : null;
+    // An empty string means "pasted nothing on purpose"; null means nothing was saved for this link.
+    return p.url === url && typeof p.text === "string" ? p.text : null;
   } catch {
     return null;
   }

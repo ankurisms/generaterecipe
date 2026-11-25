@@ -12,10 +12,8 @@ export const apiRecipeService: RecipeService = {
   async extractRecipe(url: string, { onStage, signal }: ExtractOptions = {}) {
     const check = validateVideoUrl(url);
     if (!check.ok) throw new ExtractionError("unsupported", check.message);
-    const transcript = getPendingTranscript(url);
-    if (!transcript) {
-      throw new ExtractionError("unsupported", "The transcript for this video is missing. Go back and paste it again.");
-    }
+    // The transcript is optional: the backend can read the video itself.
+    const transcript = getPendingTranscript(url) ?? "";
     onStage?.("accessing");
     // Same key on retry of the same submission, so the backend can dedupe.
     const keyId = `${url}\n${transcript.length}`;

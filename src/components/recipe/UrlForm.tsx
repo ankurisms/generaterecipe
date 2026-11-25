@@ -4,6 +4,7 @@ import { useId, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { savePendingTranscript } from "@/lib/recipe/recipe-store";
+import { validateTranscript } from "@/lib/recipe/validate-transcript";
 import { validateVideoUrl } from "@/lib/recipe/validate-url";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +29,9 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
     }
     setError(null);
     const text = transcript.trim();
-    if (text.length < 40) {
-      setTranscriptError(text ? "That transcript looks too short. Paste the full transcript." : "Paste the video's transcript to continue.");
+    const check = validateTranscript(text);
+    if (!check.ok) {
+      setTranscriptError(check.message);
       return;
     }
     setTranscriptError(null);
@@ -77,10 +79,12 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
         {error ?? "\u00a0"}
       </p>
       <label htmlFor={tId} className="mt-1 block px-1 text-sm font-medium text-foreground">
-        Video transcript
+        Video transcript (optional)
       </label>
       <p id={tHelpId} className="px-1 pt-1 text-sm leading-relaxed text-muted-foreground">
-        On YouTube, open the video's description, choose "Show transcript", then copy and paste the text here.
+        You can leave this empty. If you paste it, the recipe is built from your text instead of the video's
+        captions. On YouTube, open the video's description, choose "Show transcript", then copy and paste the
+        text here.
       </p>
       <textarea
         id={tId}

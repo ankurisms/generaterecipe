@@ -16,7 +16,7 @@ export const processRecipe = createServerFn({ method: "POST" })
     z
       .object({
         url: z.string().url().max(500),
-        transcript: z.string().min(1).max(200_000),
+        transcript: z.string().max(200_000),
         idempotencyKey: z.string().uuid(),
       })
       .parse(d),
@@ -28,7 +28,11 @@ export const processRecipe = createServerFn({ method: "POST" })
       res = await fetch(`${base.replace(/\/$/, "")}/api/v1/recipes/process`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Idempotency-Key": data.idempotencyKey },
-        body: JSON.stringify({ url: data.url, fallback_transcript: { text: data.transcript, language: null } }),
+        body: JSON.stringify(
+          data.transcript.trim()
+            ? { url: data.url, fallback_transcript: { text: data.transcript, language: null } }
+            : { url: data.url },
+        ),
       });
     } catch {
       return { ok: false, status: 0, code: "NETWORK", message: "We couldn't reach the recipe service.", retryable: true };
