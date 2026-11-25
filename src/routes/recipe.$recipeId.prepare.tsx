@@ -17,6 +17,8 @@ import type { Recipe } from "@/lib/recipe/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/recipe/$recipeId/prepare")({
+  // Recipes live in this tab\'s sessionStorage, so these screens render in the browser only.
+  ssr: false,
   loader: ({ context, params }) => loadRecipe(context.queryClient, params.recipeId),
   head: ({ loaderData }) => {
     const title = loaderData ? `Prepare: ${loaderData.title} — Recipe` : "Recipe unavailable — Recipe";

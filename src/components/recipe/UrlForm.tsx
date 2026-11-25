@@ -3,17 +3,21 @@ import { ArrowRight, Link2 } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+import { savePendingTranscript } from "@/lib/recipe/recipe-store";
 import { validateVideoUrl } from "@/lib/recipe/validate-url";
 import { cn } from "@/lib/utils";
-
-export const EXAMPLE_URL = "https://www.youtube.com/watch?v=sample-noodles";
 
 export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: string; autoFocus?: boolean }) {
   const navigate = useNavigate();
   const [value, setValue] = useState(initialUrl);
   const [error, setError] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState("");
+  const [transcriptError, setTranscriptError] = useState<string | null>(null);
   const inputId = useId();
   const errorId = useId();
+  const tId = useId();
+  const tErrId = useId();
+  const tHelpId = useId();
 
   function submit(e: FormEvent) {
     e.preventDefault();
@@ -23,6 +27,14 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
       return;
     }
     setError(null);
+    const text = transcript.trim();
+    if (text.length < 40) {
+      setTranscriptError(text ? "That transcript looks too short. Paste the full transcript." : "Paste the video's transcript to continue.");
+      return;
+    }
+    setTranscriptError(null);
+    // Kept in this tab's sessionStorage, never in the page address.
+    savePendingTranscript(result.url, text);
     void navigate({ to: "/processing", search: { url: result.url } });
   }
 
@@ -64,23 +76,39 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
       >
         {error ?? "\u00a0"}
       </p>
+      <label htmlFor={tId} className="mt-1 block px-1 text-sm font-medium text-foreground">
+        Video transcript
+      </label>
+      <p id={tHelpId} className="px-1 pt-1 text-sm leading-relaxed text-muted-foreground">
+        On YouTube, open the video's description, choose "Show transcript", then copy and paste the text here.
+      </p>
+      <textarea
+        id={tId}
+        value={transcript}
+        onChange={(e) => {
+          setTranscript(e.target.value);
+          if (transcriptError) setTranscriptError(null);
+        }}
+        rows={5}
+        placeholder="Paste the transcript from YouTube"
+        aria-invalid={!!transcriptError}
+        aria-describedby={transcriptError ? `${tHelpId} ${tErrId}` : tHelpId}
+        className={cn(
+          "mt-2 block w-full resize-y rounded-2xl border bg-card px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none",
+          transcriptError ? "border-destructive" : "border-input",
+        )}
+      />
+      <p
+        id={tErrId}
+        role="alert"
+        className={cn("min-h-6 px-4 pt-1.5 text-sm text-destructive", !transcriptError && "invisible")}
+      >
+        {transcriptError ?? "\u00a0"}
+      </p>
       <Button type="submit" size="xl" className="mt-1 w-full">
         Generate recipe
         <ArrowRight aria-hidden />
       </Button>
-      <p className="mt-3 text-center text-sm text-muted-foreground">
-        No link handy?{" "}
-        <button
-          type="button"
-          onClick={() => {
-            setValue(EXAMPLE_URL);
-            setError(null);
-          }}
-          className="font-medium text-primary underline-offset-4 hover:underline"
-        >
-          Try an example
-        </button>
-      </p>
     </form>
   );
 }

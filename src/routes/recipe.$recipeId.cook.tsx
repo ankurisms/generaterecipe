@@ -18,6 +18,8 @@ import type { Recipe, RecipeStep } from "@/lib/recipe/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/recipe/$recipeId/cook")({
+  // Recipes live in this tab\'s sessionStorage, so these screens render in the browser only.
+  ssr: false,
   validateSearch: (search: Record<string, unknown>): { step?: number } => {
     const n = Number(search["step"]);
     return Number.isFinite(n) && n >= 1 ? { step: Math.floor(n) } : {};

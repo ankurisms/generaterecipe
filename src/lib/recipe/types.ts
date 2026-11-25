@@ -94,9 +94,11 @@ export type ExtractionErrorCode = "unavailable" | "no_recipe" | "network" | "uns
 
 export class ExtractionError extends Error {
   code: ExtractionErrorCode;
-  constructor(code: ExtractionErrorCode, message: string) {
+  retryable: boolean;
+  constructor(code: ExtractionErrorCode, message: string, retryable = code !== "unsupported") {
     super(message);
     this.name = "ExtractionError";
     this.code = code;
+    this.retryable = retryable;
   }
 }

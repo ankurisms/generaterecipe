@@ -31,7 +31,9 @@ use the editor.
 
 ## Project rules
 
-- Recipe screens read data only through `recipeService` in `src/lib/recipe/service.ts` (currently the mock in `mock-service.ts`); swap the implementation there to connect a real extraction API so UI code stays unchanged.
+- Recipe screens read data only through `recipeService` in `src/lib/recipe/service.ts` (implemented by `api-service.ts`, which calls the Cloudflare backend through the `processRecipe` server function because the backend rejects browser CORS calls); backend responses go through `map-backend.ts` so UI code stays unchanged.
 - Every extracted detail carries a `certainty` (explicit / observed / estimated / unspecified); UI must show non-explicit tags and never display an invented amount for unspecified values, because the product promise is honesty about what the video actually said.
 - Cook Mode shows a countdown only when `hasEvidencedTimer` passes (duration stated or observed); estimated durations are shown as text only.
 - Per-tab cooking progress (ready ingredients, completed steps) lives in sessionStorage via `useRecipeProgress`; there are no accounts or saved recipes by design.
+
+- Generated recipes and the pending transcript live in sessionStorage (`recipe-store.ts`), never in URLs; recipe routes use `ssr: false` because the server can't see that storage.

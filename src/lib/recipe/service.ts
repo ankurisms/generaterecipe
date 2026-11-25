@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { mockRecipeService } from "./mock-service";
+import { apiRecipeService } from "./api-service";
 import type { ExtractionStage, Recipe } from "./types";
 
 export interface ExtractOptions {
@@ -19,7 +19,7 @@ export interface RecipeService {
   getRecipe(id: string): Promise<Recipe | null>;
 }
 
-export const recipeService: RecipeService = mockRecipeService;
+export const recipeService: RecipeService = apiRecipeService;
 
 export const recipeQueryOptions = (id: string) =>
   queryOptions({

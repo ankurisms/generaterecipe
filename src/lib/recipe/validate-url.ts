@@ -33,6 +33,9 @@ export function validateVideoUrl(input: string): UrlValidationResult {
     return isVideo ? { ok: true, url: parsed.toString(), platform: "youtube" } : unsupportedPage();
   }
 
+  if (/(^|\.)instagram\.com$/.test(host)) {
+    return { ok: false, reason: "unsupported", message: "Instagram support is coming later. For now, paste a YouTube link." };
+  }
   return {
     ok: false,
     reason: "unsupported",

@@ -61,7 +61,7 @@ function Processing() {
           status: "error",
           stage: current,
           message: isKnown ? err.message : "Something went wrong while reading the video.",
-          retryable: !isKnown || err.code !== "unsupported",
+          retryable: !isKnown || err.retryable,
         });
       });
 
