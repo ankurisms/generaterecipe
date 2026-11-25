@@ -85,12 +85,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Recipe — Turn recipe videos into recipes" },
       {
         name: "description",
-        content: "Paste a YouTube or Instagram Reel cooking video and get ingredients, steps and a simple cook mode.",
+        content: "Paste a YouTube cooking video and get ingredients, steps and a simple cook mode.",
       },
       { property: "og:title", content: "Recipe — Turn recipe videos into recipes" },
       {
         property: "og:description",
-        content: "Paste a YouTube or Instagram Reel cooking video and get ingredients, steps and a simple cook mode.",
+        content: "Paste a YouTube cooking video and get ingredients, steps and a simple cook mode.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

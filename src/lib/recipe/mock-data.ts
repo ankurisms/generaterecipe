@@ -1,14 +1,13 @@
 import thumbnail from "@/assets/reel-thumbnail.jpg.asset.json";
 import type { Recipe } from "./types";
 
-/** Realistic sample of what the extraction API returns for a short recipe Reel. */
+/** Realistic sample of what the extraction API returns for a short recipe video. */
 export const MOCK_RECIPE: Recipe = {
   id: "chilli-garlic-noodles",
   title: "10-Minute Chilli Garlic Noodles",
   description: "Sizzling garlic chilli oil tossed through springy wheat noodles.",
   source: {
-    platform: "instagram",
-    url: "https://www.instagram.com/reel/C8xNoodles10/",
+    platform: "youtube",
     thumbnailUrl: thumbnail.url,
   },
   servings: { value: 2, certainty: "explicit" },

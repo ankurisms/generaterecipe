@@ -12,9 +12,11 @@ import {
   RecipeMeta,
   SectionHeading,
   SourceThumbnail,
+  SourceAttribution,
   StickyCta,
   UncertaintySummary,
 } from "@/components/recipe/RecipeSections";
+import { SiteFooter } from "@/components/recipe/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { loadRecipe } from "@/lib/recipe/load";
 import { recipeQueryOptions } from "@/lib/recipe/service";
@@ -70,6 +72,7 @@ function RecipeReview() {
           </div>
           <RecipeMeta recipe={recipe} />
           <UncertaintySummary recipe={recipe} />
+          <SourceAttribution recipe={recipe} />
         </section>
 
         <div className="space-y-12">
@@ -98,6 +101,9 @@ function RecipeReview() {
           </section>
         </div>
       </main>
+      <div className="mt-16">
+        <SiteFooter />
+      </div>
 
       <StickyCta hint="Next, gather everything before you start cooking.">
         <Button asChild size="xl" className="w-full sm:w-auto">

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { validateVideoUrl } from "@/lib/recipe/validate-url";
 import { cn } from "@/lib/utils";
 
-export const EXAMPLE_URL = "https://www.instagram.com/reel/C8xNoodles10/";
+export const EXAMPLE_URL = "https://www.youtube.com/watch?v=sample-noodles";
 
 export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: string; autoFocus?: boolean }) {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
           autoCapitalize="off"
           spellCheck={false}
           autoFocus={autoFocus}
-          placeholder="Paste a YouTube or Reel link"
+          placeholder="Paste a YouTube link"
           value={value}
           onChange={(e) => {
             setValue(e.target.value);

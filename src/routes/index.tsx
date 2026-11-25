@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Instagram, Youtube } from "lucide-react";
+import { Youtube } from "lucide-react";
 
 import hero from "@/assets/hero-noodles.jpg.asset.json";
 import { AppHeader } from "@/components/recipe/AppHeader";
+import { SiteFooter } from "@/components/recipe/SiteFooter";
 import { UrlForm } from "@/components/recipe/UrlForm";
 
 export const Route = createFileRoute("/")({
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Paste a YouTube or Instagram Reel cooking video. Get ingredients, instructions and a simple cooking experience.",
+          "Paste a YouTube cooking video. Get ingredients, instructions and a simple cooking experience.",
       },
       { property: "og:title", content: "Recipe — Turn recipe videos into recipes" },
       {
@@ -48,9 +49,6 @@ function Welcome() {
             <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
               <Youtube className="size-4" aria-hidden /> YouTube
             </span>
-            <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-              <Instagram className="size-4" aria-hidden /> Instagram Reels
-            </span>
           </div>
         </section>
 
@@ -83,6 +81,7 @@ function Welcome() {
           ))}
         </ol>
       </section>
+      <SiteFooter />
     </div>
   );
 }

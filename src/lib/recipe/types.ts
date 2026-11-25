@@ -12,7 +12,7 @@
  */
 export type Certainty = "explicit" | "observed" | "estimated" | "unspecified";
 
-export type SourcePlatform = "youtube" | "instagram";
+export type SourcePlatform = "youtube";
 
 /** A single value with its provenance. `value` is null when unspecified. */
 export interface SourcedValue<T> {
@@ -58,7 +58,11 @@ export interface RecipeStep {
 
 export interface RecipeSource {
   platform: SourcePlatform;
-  url: string;
+  /** Link to the original video; omitted when unavailable (e.g. the built-in sample). */
+  url?: string;
+  /** Original video title, when available. */
+  videoTitle?: string;
+  /** Creator / channel name, when available. */
   author?: string;
   thumbnailUrl?: string;
 }

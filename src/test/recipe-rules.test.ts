@@ -31,10 +31,10 @@ describe("video link validation", () => {
     expect(validateVideoUrl("https://youtube.com/shorts/abc123")).toMatchObject({ ok: true, platform: "youtube" });
   });
 
-  it("accepts Instagram Reels", () => {
+  it("rejects Instagram links (YouTube only)", () => {
     expect(validateVideoUrl("https://www.instagram.com/reel/C8xNoodles10/")).toMatchObject({
-      ok: true,
-      platform: "instagram",
+      ok: false,
+      reason: "unsupported",
     });
   });
 });

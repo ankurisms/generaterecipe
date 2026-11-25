@@ -1,4 +1,5 @@
-import { Instagram, Youtube } from "lucide-react";
+import { Youtube } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { CertaintyTag } from "./CertaintyTag";
@@ -17,8 +18,6 @@ export function SectionHeading({ children, aside }: { children: ReactNode; aside
 
 export function SourceThumbnail({ recipe }: { recipe: Recipe }) {
   const { source } = recipe;
-  const PlatformIcon = source.platform === "youtube" ? Youtube : Instagram;
-  const platformLabel = source.platform === "youtube" ? "YouTube" : "Instagram Reel";
   return (
     <div className="relative overflow-hidden rounded-3xl bg-surface">
       {source.thumbnailUrl ? (
@@ -32,8 +31,8 @@ export function SourceThumbnail({ recipe }: { recipe: Recipe }) {
       )}
       <div className="absolute bottom-3 left-3">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur">
-          <PlatformIcon className="size-3.5" aria-hidden />
-          {platformLabel}
+          <Youtube className="size-3.5" aria-hidden />
+          YouTube
         </span>
       </div>
     </div>
@@ -183,5 +182,60 @@ export function StickyCta({ children, hint }: { children: ReactNode; hint?: Reac
         <div className="w-full sm:ml-auto sm:w-auto">{children}</div>
       </div>
     </div>
+  );
+}
+
+export function SourceAttribution({ recipe }: { recipe: Recipe }) {
+  const { source } = recipe;
+  return (
+    <aside aria-labelledby="source-heading" className="rounded-2xl border border-border p-4 text-sm">
+      <h2 id="source-heading" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        Original Recipe Source
+      </h2>
+      <dl className="mt-3 space-y-1.5">
+        {source.videoTitle && (
+          <div className="flex gap-2">
+            <dt className="text-muted-foreground">Video:</dt>
+            <dd className="font-medium text-foreground">{source.videoTitle}</dd>
+          </div>
+        )}
+        {source.author && (
+          <div className="flex gap-2">
+            <dt className="text-muted-foreground">Channel:</dt>
+            <dd className="font-medium text-foreground">{source.author}</dd>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <dt className="text-muted-foreground">Source:</dt>
+          <dd className="inline-flex items-center gap-1.5 font-medium text-foreground">
+            <Youtube className="size-4" aria-hidden /> YouTube
+          </dd>
+        </div>
+      </dl>
+      {source.url ? (
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block font-medium text-primary underline-offset-4 hover:underline"
+        >
+          View the original video
+        </a>
+      ) : (
+        <p className="mt-3 italic text-muted-foreground">
+          This is a sample recipe, so there's no original video to link to.
+        </p>
+      )}
+      <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+        Recipe structured by GenerateRecipe. Original content belongs to its respective creator.
+      </p>
+      <Link
+        to="/creators"
+        hash="contact"
+        className="mt-2 inline-block text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      >
+        Report a concern / Request removal
+      </Link>
+    </aside>
   );
 }

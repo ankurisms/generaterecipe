@@ -5,9 +5,8 @@ export type UrlValidationResult =
   | { ok: false; reason: "empty" | "invalid" | "unsupported"; message: string };
 
 const YOUTUBE_HOSTS = ["youtube.com", "m.youtube.com", "www.youtube.com", "youtu.be"];
-const INSTAGRAM_HOSTS = ["instagram.com", "www.instagram.com", "m.instagram.com"];
 
-/** Validates a pasted video link. Only YouTube videos/Shorts and Instagram Reels/posts are supported. */
+/** Validates a pasted video link. Only YouTube videos and Shorts are supported. */
 export function validateVideoUrl(input: string): UrlValidationResult {
   const trimmed = input.trim();
   if (!trimmed) {
@@ -34,15 +33,10 @@ export function validateVideoUrl(input: string): UrlValidationResult {
     return isVideo ? { ok: true, url: parsed.toString(), platform: "youtube" } : unsupportedPage();
   }
 
-  if (INSTAGRAM_HOSTS.includes(host)) {
-    const isReel = /^\/(reel|reels|p)\/[\w-]+/.test(path);
-    return isReel ? { ok: true, url: parsed.toString(), platform: "instagram" } : unsupportedPage();
-  }
-
   return {
     ok: false,
     reason: "unsupported",
-    message: "We currently support YouTube and Instagram Reels links.",
+    message: "We currently support YouTube links only.",
   };
 }
 
@@ -54,6 +48,6 @@ function unsupportedPage(): UrlValidationResult {
   return {
     ok: false,
     reason: "unsupported",
-    message: "Link to a specific video or Reel, not a profile or channel page.",
+    message: "Link to a specific video, not a profile or channel page.",
   };
 }
