@@ -1,9 +1,8 @@
 /**
  * Where creator concern / removal requests are sent.
- * PLACEHOLDER: no support address is configured yet. Set this to the real
- * support email to enable the request form on the Creators page.
+ * The Creators page shows the request form whenever this is set.
  */
-export const CREATOR_SUPPORT_EMAIL: string | null = null;
+export const CREATOR_SUPPORT_EMAIL: string | null = "ankur9391@gmail.com";
 
 export function buildCreatorRequestMailto(
   to: string,
