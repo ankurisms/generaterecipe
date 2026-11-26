@@ -1,7 +1,4 @@
-/**
- * The transcript is optional: the backend can read the video itself, and the
- * pasted text is only a fallback. A pasted transcript still has to be usable.
- */
+/** A transcript can be supplied later if the backend can't process the video without one. */
 export type TranscriptCheck = { ok: true } | { ok: false; message: string };
 
 const MIN_USEFUL_LENGTH = 40;

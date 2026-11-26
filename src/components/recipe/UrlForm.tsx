@@ -8,7 +8,13 @@ import { validateTranscript } from "@/lib/recipe/validate-transcript";
 import { validateVideoUrl } from "@/lib/recipe/validate-url";
 import { cn } from "@/lib/utils";
 
-export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: string; autoFocus?: boolean }) {
+export function UrlForm({
+  initialUrl = "",
+  autoFocus = false,
+}: {
+  initialUrl?: string;
+  autoFocus?: boolean;
+}) {
   const navigate = useNavigate();
   const [value, setValue] = useState(initialUrl);
   const [error, setError] = useState<string | null>(null);
@@ -82,9 +88,8 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
         Video transcript (optional)
       </label>
       <p id={tHelpId} className="px-1 pt-1 text-sm leading-relaxed text-muted-foreground">
-        You can leave this empty. If you paste it, the recipe is built from your text instead of the video's
-        captions. On YouTube, open the video's description, choose "Show transcript", then copy and paste the
-        text here.
+        You can leave this empty to start. If a transcript is needed, we’ll ask you to copy it from
+        YouTube and paste it before generating your recipe.
       </p>
       <textarea
         id={tId}
@@ -105,7 +110,10 @@ export function UrlForm({ initialUrl = "", autoFocus = false }: { initialUrl?: s
       <p
         id={tErrId}
         role="alert"
-        className={cn("min-h-6 px-4 pt-1.5 text-sm text-destructive", !transcriptError && "invisible")}
+        className={cn(
+          "min-h-6 px-4 pt-1.5 text-sm text-destructive",
+          !transcriptError && "invisible",
+        )}
       >
         {transcriptError ?? "\u00a0"}
       </p>

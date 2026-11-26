@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Check, RotateCcw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 
 import { AppHeader } from "@/components/recipe/AppHeader";
 import { ProgressBar } from "@/components/recipe/ProgressBar";
 import { Button } from "@/components/ui/button";
 import { recipeService } from "@/lib/recipe/service";
 import { EXTRACTION_STAGES, ExtractionError, type ExtractionStage } from "@/lib/recipe/types";
+import { savePendingTranscript } from "@/lib/recipe/recipe-store";
+import { validateTranscript } from "@/lib/recipe/validate-transcript";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/processing")({
@@ -16,9 +18,15 @@ export const Route = createFileRoute("/processing")({
   head: () => ({
     meta: [
       { title: "Generating your recipe — Recipe" },
-      { name: "description", content: "Reading the cooking video and extracting ingredients and steps." },
+      {
+        name: "description",
+        content: "Reading the cooking video and extracting ingredients and steps.",
+      },
       { property: "og:title", content: "Generating your recipe — Recipe" },
-      { property: "og:description", content: "Reading the cooking video and extracting ingredients and steps." },
+      {
+        property: "og:description",
+        content: "Reading the cooking video and extracting ingredients and steps.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -29,13 +37,33 @@ export const Route = createFileRoute("/processing")({
 
 type State =
   | { status: "running"; stage: ExtractionStage }
-  | { status: "error"; stage: ExtractionStage; message: string; retryable: boolean };
+  | {
+      status: "error";
+      stage: ExtractionStage;
+      message: string;
+      retryable: boolean;
+      requiresTranscript: boolean;
+    };
 
 function Processing() {
   const { url } = Route.useSearch();
   const navigate = useNavigate();
   const [attempt, setAttempt] = useState(0);
+  const [transcriptSubmission, setTranscriptSubmission] = useState<{
+    text: string;
+    language: string;
+  } | null>(null);
+  const [transcriptText, setTranscriptText] = useState("");
+  const [transcriptLanguage, setTranscriptLanguage] = useState("en");
+  const [transcriptValidation, setTranscriptValidation] = useState<string | null>(null);
   const [state, setState] = useState<State>({ status: "running", stage: "accessing" });
+  const transcriptId = useId();
+  const languageId = useId();
+  const transcriptRequest = useRef<{ url: string; key: string } | null>(null);
+  if (transcriptRequest.current?.url !== url) {
+    transcriptRequest.current = { url, key: crypto.randomUUID() };
+  }
+  const requestKey = transcriptRequest.current.key;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,6 +73,13 @@ function Processing() {
     recipeService
       .extractRecipe(url, {
         signal: controller.signal,
+        idempotencyKey: requestKey,
+        ...(transcriptSubmission
+          ? {
+              transcript: transcriptSubmission.text,
+              transcriptLanguage: transcriptSubmission.language,
+            }
+          : {}),
         onStage: (stage) => {
           current = stage;
           setState({ status: "running", stage });
@@ -62,11 +97,30 @@ function Processing() {
           stage: current,
           message: isKnown ? err.message : "Something went wrong while reading the video.",
           retryable: !isKnown || err.retryable,
+          requiresTranscript:
+            isKnown && (err.code === "transcript_required" || err.code === "invalid_transcript"),
         });
       });
 
     return () => controller.abort();
-  }, [url, attempt, navigate]);
+  }, [url, attempt, navigate, requestKey, transcriptSubmission]);
+
+  function submitTranscript(event: FormEvent) {
+    event.preventDefault();
+    const text = transcriptText.trim();
+    if (!text) {
+      setTranscriptValidation("Paste the transcript from YouTube to continue.");
+      return;
+    }
+    const check = validateTranscript(text);
+    if (!check.ok) {
+      setTranscriptValidation(check.message);
+      return;
+    }
+    setTranscriptValidation(null);
+    savePendingTranscript(url, text);
+    setTranscriptSubmission({ text, language: transcriptLanguage.trim() });
+  }
 
   const stageIndex = EXTRACTION_STAGES.findIndex((s) => s.id === state.stage);
   const progress = state.status === "error" ? (stageIndex + 0.5) / 3 : (stageIndex + 0.6) / 3;
@@ -78,7 +132,9 @@ function Processing() {
         {state.status === "running" ? (
           <>
             <p className="text-sm font-medium text-muted-foreground">Working on it</p>
-            <h1 className="mt-1 font-display text-3xl font-medium text-foreground">Reading your video</h1>
+            <h1 className="mt-1 font-display text-3xl font-medium text-foreground">
+              Reading your video
+            </h1>
             <p className="mt-2 truncate text-sm text-muted-foreground" title={url}>
               {url}
             </p>
@@ -98,6 +154,58 @@ function Processing() {
           label="Recipe generation progress"
           className={cn("mt-8", state.status === "error" && "[&>div]:bg-destructive")}
         />
+
+        {state.status === "error" && state.requiresTranscript && (
+          <form onSubmit={submitTranscript} noValidate className="mt-8 space-y-3">
+            <label htmlFor={transcriptId} className="block text-sm font-medium text-foreground">
+              Paste the YouTube transcript
+            </label>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              On YouTube, open the video description, choose “Show transcript,” then copy and paste
+              the transcript below. The video link is unchanged.
+            </p>
+            <textarea
+              id={transcriptId}
+              rows={7}
+              value={transcriptText}
+              onChange={(event) => {
+                setTranscriptText(event.target.value);
+                if (transcriptValidation) setTranscriptValidation(null);
+              }}
+              aria-invalid={Boolean(transcriptValidation)}
+              aria-describedby={transcriptValidation ? `${transcriptId}-error` : undefined}
+              className={cn(
+                "block w-full resize-y rounded-2xl border bg-card px-4 py-3 text-base text-foreground focus:outline-none",
+                transcriptValidation ? "border-destructive" : "border-input focus:border-primary",
+              )}
+              placeholder="Paste the copied transcript here"
+            />
+            {transcriptValidation && (
+              <p id={`${transcriptId}-error`} role="alert" className="text-sm text-destructive">
+                {transcriptValidation}
+              </p>
+            )}
+            <div className="space-y-1">
+              <label htmlFor={languageId} className="block text-sm font-medium text-foreground">
+                Transcript language
+              </label>
+              <input
+                id={languageId}
+                value={transcriptLanguage}
+                onChange={(event) => setTranscriptLanguage(event.target.value)}
+                maxLength={64}
+                placeholder="en"
+                className="w-full rounded-xl border border-input bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Use a language code such as “en” or “es”.
+              </p>
+            </div>
+            <Button type="submit" size="xl" className="w-full">
+              Generate recipe from transcript
+            </Button>
+          </form>
+        )}
 
         <ol className="mt-6 space-y-4" aria-live="polite">
           {EXTRACTION_STAGES.map((s, i) => {

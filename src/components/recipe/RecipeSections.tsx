@@ -48,19 +48,25 @@ function MetaItem({
   item: SourcedValue<number>;
   format: (n: number) => string;
 }) {
-  const missing = item.value == null;
+  const missing = item.value == null && !item.text;
   return (
     <div className="flex flex-col gap-1.5">
-      <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</dt>
+      <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </dt>
       <dd
         className={cn(
           "text-xl font-semibold tabular-nums text-foreground",
           missing && "text-base font-medium italic text-unspecified",
         )}
       >
-        {missing ? "Not given" : `${item.certainty === "estimated" ? "≈ " : ""}${format(item.value!)}`}
+        {missing
+          ? "Not given"
+          : item.value == null
+            ? item.text
+            : `${item.certainty === "estimated" ? "≈ " : ""}${format(item.value)}`}
       </dd>
-      {item.certainty !== "explicit" && (
+      {!missing && item.certainty !== "explicit" && (
         <dd>
           <CertaintyTag certainty={item.certainty} />
         </dd>
@@ -90,20 +96,30 @@ export function UncertaintySummary({ recipe }: { recipe: Recipe }) {
   ].filter(Boolean);
   return (
     <p className="text-sm leading-relaxed text-muted-foreground">
-      <span className="font-medium text-foreground">Check before you cook:</span> {parts.join(" and ")}. They're
-      marked below.
+      <span className="font-medium text-foreground">Check before you cook:</span>{" "}
+      {parts.join(" and ")}. They're marked below.
     </p>
   );
 }
 
-export function QuantityLabel({ ingredient, className }: { ingredient: Ingredient; className?: string }) {
+export function QuantityLabel({
+  ingredient,
+  className,
+}: {
+  ingredient: Ingredient;
+  className?: string;
+}) {
   const qty = formatQuantity(ingredient);
   if (qty == null) {
-    return <span className={cn("text-sm italic text-unspecified", className)}>Amount not given</span>;
+    return (
+      <span className={cn("text-sm italic text-unspecified", className)}>Amount not given</span>
+    );
   }
   return (
     <span className={cn("font-semibold tabular-nums text-foreground", className)}>
-      {ingredient.certainty === "estimated" && <span aria-label="about">≈ </span>}
+      {(ingredient.amountCertainty ?? ingredient.certainty) === "estimated" && (
+        <span aria-label="about">≈ </span>
+      )}
       {qty}
     </span>
   );
@@ -120,18 +136,31 @@ export function IngredientList({ ingredients }: { ingredients: Ingredient[] }) {
       {[...groups.entries()].map(([group, items]) => (
         <div key={group || "all"}>
           {group && (
-            <h3 className="pt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{group}</h3>
+            <h3 className="pt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {group}
+            </h3>
           )}
           <ul className="divide-y divide-border">
             {items.map((ing) => (
               <li key={ing.id} className="flex items-start justify-between gap-4 py-3.5">
                 <div className="min-w-0">
                   <p className="text-base font-medium text-foreground">{ing.name}</p>
-                  {ing.preparation && <p className="text-sm text-muted-foreground">{ing.preparation}</p>}
+                  {ing.preparation && (
+                    <p className="text-sm text-muted-foreground">{ing.preparation}</p>
+                  )}
+                  {ing.preparation &&
+                    ing.preparationCertainty &&
+                    ing.preparationCertainty !== "explicit" && (
+                      <div className="mt-1">
+                        <CertaintyTag certainty={ing.preparationCertainty} />
+                      </div>
+                    )}
                   {ing.certainty !== "explicit" && (
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <CertaintyTag certainty={ing.certainty} />
-                      {ing.note && <span className="text-xs text-muted-foreground">{ing.note}</span>}
+                      {ing.note && (
+                        <span className="text-xs text-muted-foreground">{ing.note}</span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -166,8 +195,13 @@ export function MethodList({ steps }: { steps: RecipeStep[] }) {
     <ol className="space-y-5">
       {steps.map((s, i) => (
         <li key={s.id} className="flex gap-4">
-          <span className="w-6 shrink-0 font-display text-lg text-primary tabular-nums">{i + 1}</span>
-          <p className="text-base leading-relaxed text-foreground">{s.text}</p>
+          <span className="w-6 shrink-0 font-display text-lg text-primary tabular-nums">
+            {i + 1}
+          </span>
+          <div className="space-y-1">
+            <p className="text-base leading-relaxed text-foreground">{s.text}</p>
+            {s.certainty && s.certainty !== "explicit" && <CertaintyTag certainty={s.certainty} />}
+          </div>
         </li>
       ))}
     </ol>
@@ -178,7 +212,9 @@ export function StickyCta({ children, hint }: { children: ReactNode; hint?: Reac
   return (
     <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
       <div className="mx-auto flex w-full max-w-5xl items-center gap-4 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:px-8">
-        {hint && <div className="hidden min-w-0 flex-1 text-sm text-muted-foreground sm:block">{hint}</div>}
+        {hint && (
+          <div className="hidden min-w-0 flex-1 text-sm text-muted-foreground sm:block">{hint}</div>
+        )}
         <div className="w-full sm:ml-auto sm:w-auto">{children}</div>
       </div>
     </div>
@@ -188,8 +224,14 @@ export function StickyCta({ children, hint }: { children: ReactNode; hint?: Reac
 export function SourceAttribution({ recipe }: { recipe: Recipe }) {
   const { source } = recipe;
   return (
-    <aside aria-labelledby="source-heading" className="rounded-2xl border border-border p-4 text-sm">
-      <h2 id="source-heading" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+    <aside
+      aria-labelledby="source-heading"
+      className="rounded-2xl border border-border p-4 text-sm"
+    >
+      <h2
+        id="source-heading"
+        className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+      >
         Original Recipe Source
       </h2>
       <dl className="mt-3 space-y-1.5">

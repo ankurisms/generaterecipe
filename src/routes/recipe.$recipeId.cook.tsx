@@ -69,7 +69,8 @@ function CookMode() {
   // Keyboard: arrows to move, space/enter handled by focused buttons.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLElement && ["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      if (e.target instanceof HTMLElement && ["INPUT", "TEXTAREA"].includes(e.target.tagName))
+        return;
       if (e.key === "ArrowRight") goTo(stepNumber + 1);
       if (e.key === "ArrowLeft") goTo(stepNumber - 1);
     };
@@ -90,7 +91,8 @@ function CookMode() {
     if (!start || !t) return;
     const dx = t.clientX - start.x;
     const dy = t.clientY - start.y;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) goTo(stepNumber + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5)
+      goTo(stepNumber + (dx < 0 ? 1 : -1));
   };
 
   const otherTimers = timers.activeIds
@@ -98,7 +100,9 @@ function CookMode() {
     .map((id) => {
       const idx = recipe.steps.findIndex((s) => s.id === id);
       const s = recipe.steps[idx];
-      return s && s.durationSeconds ? { idx, view: timers.get(id, s.durationSeconds * 1000) } : null;
+      return s && s.durationSeconds
+        ? { idx, view: timers.get(id, s.durationSeconds * 1000) }
+        : null;
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
 
@@ -108,7 +112,11 @@ function CookMode() {
       <header className="mx-auto w-full max-w-2xl px-4 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6">
         <div className="flex h-14 items-center justify-between gap-3">
           <Button asChild variant="ghost" size="touch" className="-ml-2 px-3 text-muted-foreground">
-            <Link to="/recipe/$recipeId" params={{ recipeId }} aria-label="Exit cook mode and return to recipe overview">
+            <Link
+              to="/recipe/$recipeId"
+              params={{ recipeId }}
+              aria-label="Exit cook mode and return to recipe overview"
+            >
               <X aria-hidden /> Overview
             </Link>
           </Button>
@@ -144,7 +152,9 @@ function CookMode() {
                 onClick={() => goTo(idx + 1)}
                 className={cn(
                   "inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium tabular-nums",
-                  view.done ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground",
+                  view.done
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground",
                 )}
               >
                 <Timer className="size-4" aria-hidden />
@@ -156,7 +166,15 @@ function CookMode() {
       </header>
 
       {finished ? (
-        <Finished recipe={recipe} recipeId={recipeId} onRestart={() => { resetSteps(); goTo(1); }} onBack={() => goTo(total)} />
+        <Finished
+          recipe={recipe}
+          recipeId={recipeId}
+          onRestart={() => {
+            resetSteps();
+            goTo(1);
+          }}
+          onBack={() => goTo(total)}
+        />
       ) : step ? (
         <>
           <main
@@ -231,7 +249,10 @@ function StepContent({
     .map((id) => recipe.ingredients.find((i) => i.id === id))
     .filter((i): i is NonNullable<typeof i> => !!i);
   const estimatedDuration =
-    !timer && step.durationSeconds && step.durationCertainty && step.durationCertainty !== "unspecified";
+    !timer &&
+    step.durationSeconds &&
+    step.durationCertainty &&
+    step.durationCertainty !== "unspecified";
 
   return (
     <div className="animate-fade-up space-y-8">
@@ -248,21 +269,35 @@ function StepContent({
         <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface px-4 py-3 text-sm text-muted-foreground">
           <CertaintyTag certainty={step.durationCertainty!} />
           <span>
-            About {formatMinutes(Math.max(1, Math.round(step.durationSeconds! / 60)))}. The video doesn't confirm the time, so
-            go by the cue rather than a timer.
+            About {formatMinutes(Math.max(1, Math.round(step.durationSeconds! / 60)))}. The video
+            doesn't confirm the time, so go by the cue rather than a timer.
           </span>
+        </div>
+      )}
+
+      {step.durationText && step.durationSeconds == null && (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface px-4 py-3 text-sm text-muted-foreground">
+          <CertaintyTag certainty={step.durationCertainty ?? "unspecified"} />
+          <span>{step.durationText}</span>
         </div>
       )}
 
       {used.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">You'll need</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            You'll need
+          </p>
           <ul className="mt-2 divide-y divide-border">
             {used.map((ing) => (
-              <li key={ing.id} className="flex items-baseline justify-between gap-4 py-2.5 text-base">
+              <li
+                key={ing.id}
+                className="flex items-baseline justify-between gap-4 py-2.5 text-base"
+              >
                 <span className="text-foreground">
                   {ing.name}
-                  {ing.preparation && <span className="text-muted-foreground">, {ing.preparation}</span>}
+                  {ing.preparation && (
+                    <span className="text-muted-foreground">, {ing.preparation}</span>
+                  )}
                 </span>
                 <QuantityLabel ingredient={ing} className="shrink-0 text-right" />
               </li>
@@ -306,7 +341,11 @@ function Finished({
         <Button size="xl" variant="outline" className="bg-transparent" onClick={onBack}>
           Review last step
         </Button>
-        <button type="button" onClick={onRestart} className="mt-2 text-sm font-medium text-primary hover:underline">
+        <button
+          type="button"
+          onClick={onRestart}
+          className="mt-2 text-sm font-medium text-primary hover:underline"
+        >
           Cook it again from step 1
         </button>
       </div>

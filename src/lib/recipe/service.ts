@@ -6,11 +6,13 @@ import type { ExtractionStage, Recipe } from "./types";
 export interface ExtractOptions {
   onStage?: (stage: ExtractionStage) => void;
   signal?: AbortSignal;
+  idempotencyKey?: string;
+  transcript?: string;
+  transcriptLanguage?: string | null;
 }
 
 /**
- * Contract between the UI and the recipe backend. Swap `recipeService` for an
- * HTTP implementation when the extraction API exists; screens stay unchanged.
+ * Contract between the UI and the recipe backend.
  */
 export interface RecipeService {
   /** Starts extraction for a validated video URL and resolves with the new recipe id. */

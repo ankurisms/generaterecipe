@@ -17,6 +17,7 @@ export const processRecipe = createServerFn({ method: "POST" })
       .object({
         url: z.string().url().max(500),
         transcript: z.string().max(200_000),
+        transcriptLanguage: z.string().max(64).nullable().optional(),
         idempotencyKey: z.string().uuid(),
       })
       .parse(d),
@@ -30,12 +31,24 @@ export const processRecipe = createServerFn({ method: "POST" })
         headers: { "Content-Type": "application/json", "Idempotency-Key": data.idempotencyKey },
         body: JSON.stringify(
           data.transcript.trim()
-            ? { url: data.url, fallback_transcript: { text: data.transcript, language: null } }
+            ? {
+                url: data.url,
+                fallback_transcript: {
+                  text: data.transcript,
+                  language: data.transcriptLanguage ?? null,
+                },
+              }
             : { url: data.url },
         ),
       });
     } catch {
-      return { ok: false, status: 0, code: "NETWORK", message: "We couldn't reach the recipe service.", retryable: true };
+      return {
+        ok: false,
+        status: 0,
+        code: "NETWORK",
+        message: "We couldn't reach the recipe service.",
+        retryable: true,
+      };
     }
     let body: unknown = null;
     try {
@@ -44,7 +57,9 @@ export const processRecipe = createServerFn({ method: "POST" })
       /* non-JSON */
     }
     if (!res.ok) {
-      const err = (body as { error?: { code?: string; message?: string; retryable?: boolean } } | null)?.error;
+      const err = (
+        body as { error?: { code?: string; message?: string; retryable?: boolean } } | null
+      )?.error;
       return {
         ok: false,
         status: res.status,

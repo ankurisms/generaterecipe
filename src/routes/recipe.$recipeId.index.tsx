@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/recipe/AppHeader";
-import { CertaintyLegend } from "@/components/recipe/CertaintyTag";
+import { CertaintyLegend, CertaintyTag } from "@/components/recipe/CertaintyTag";
 import { RecipeNotFound } from "@/components/recipe/RecipeNotFound";
 import {
   EquipmentList,
@@ -68,12 +68,34 @@ function RecipeReview() {
             <h1 className="font-display text-[2rem] leading-tight font-medium text-foreground sm:text-4xl">
               {recipe.title}
             </h1>
+            {recipe.titleCertainty && recipe.titleCertainty !== "explicit" && (
+              <div className="mt-2">
+                <CertaintyTag certainty={recipe.titleCertainty} />
+              </div>
+            )}
             {recipe.description && (
-              <p className="mt-2 text-base leading-relaxed text-muted-foreground">{recipe.description}</p>
+              <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                {recipe.description}
+              </p>
+            )}
+            {recipe.descriptionCertainty && recipe.descriptionCertainty !== "explicit" && (
+              <div className="mt-2">
+                <CertaintyTag certainty={recipe.descriptionCertainty} />
+              </div>
             )}
           </div>
           <RecipeMeta recipe={recipe} />
           <UncertaintySummary recipe={recipe} />
+          {recipe.warnings && recipe.warnings.length > 0 && (
+            <aside className="rounded-2xl border border-estimated/30 bg-estimated/5 p-4 text-sm">
+              <h2 className="font-semibold text-foreground">Notes from the recipe</h2>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+                {recipe.warnings.map((warning, index) => (
+                  <li key={`${index}-${warning}`}>{warning}</li>
+                ))}
+              </ul>
+            </aside>
+          )}
           <SourceAttribution recipe={recipe} />
         </section>
 

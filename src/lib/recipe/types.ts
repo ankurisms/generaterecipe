@@ -18,6 +18,7 @@ export type SourcePlatform = "youtube";
 export interface SourcedValue<T> {
   value: T | null;
   certainty: Certainty;
+  text?: string;
   note?: string;
 }
 
@@ -26,11 +27,15 @@ export interface Ingredient {
   name: string;
   /** Numeric amount, or null when the video never gives one. */
   amount: number | null;
+  /** Literal quantity when the source gives a non-numeric amount such as "to taste". */
+  amountText?: string;
+  amountCertainty?: Certainty;
   /** Upper bound for ranges such as "2–3 cloves". */
   amountMax?: number;
   unit?: string;
   /** Free-text prep detail, e.g. "finely chopped". */
   preparation?: string;
+  preparationCertainty?: Certainty;
   /** Grouping shown in the video, e.g. "Sauce". */
   group?: string;
   certainty: Certainty;
@@ -51,6 +56,9 @@ export interface RecipeStep {
   durationSeconds?: number;
   /** How the duration was obtained. Required whenever durationSeconds is set. */
   durationCertainty?: Certainty;
+  /** Literal duration when the source doesn't provide a numeric timer. */
+  durationText?: string;
+  certainty?: Certainty;
   tip?: string;
   /** Ingredient ids used in this step. */
   ingredientIds?: string[];
@@ -70,7 +78,9 @@ export interface RecipeSource {
 export interface Recipe {
   id: string;
   title: string;
+  titleCertainty?: Certainty;
   description?: string;
+  descriptionCertainty?: Certainty;
   source: RecipeSource;
   servings: SourcedValue<number>;
   /** Minutes. */
@@ -80,6 +90,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   equipment: Equipment[];
   steps: RecipeStep[];
+  warnings?: string[];
 }
 
 export type ExtractionStage = "accessing" | "analysing" | "preparing";
@@ -90,7 +101,13 @@ export const EXTRACTION_STAGES: { id: ExtractionStage; label: string }[] = [
   { id: "preparing", label: "Preparing your recipe" },
 ];
 
-export type ExtractionErrorCode = "unavailable" | "no_recipe" | "network" | "unsupported";
+export type ExtractionErrorCode =
+  | "unavailable"
+  | "no_recipe"
+  | "network"
+  | "unsupported"
+  | "transcript_required"
+  | "invalid_transcript";
 
 export class ExtractionError extends Error {
   code: ExtractionErrorCode;

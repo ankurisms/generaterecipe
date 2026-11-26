@@ -18,8 +18,13 @@ export function formatNumber(n: number): string {
 }
 
 /** Quantity label for an ingredient, or null when no amount was given. */
-export function formatQuantity(ing: Pick<Ingredient, "amount" | "amountMax" | "unit">): string | null {
-  if (ing.amount == null) return null;
+export function formatQuantity(
+  ing: Pick<Ingredient, "amount" | "amountMax" | "amountText" | "unit">,
+): string | null {
+  if (ing.amount == null) {
+    if (!ing.amountText) return null;
+    return ing.unit ? `${ing.amountText} ${ing.unit}` : ing.amountText;
+  }
   const amount =
     ing.amountMax != null
       ? `${formatNumber(ing.amount)}–${formatNumber(ing.amountMax)}`
